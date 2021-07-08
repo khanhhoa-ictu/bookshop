@@ -114,7 +114,7 @@ class ContentCart extends Component {
               <table className="table table-condensed">
                 <thead>
                   <tr className="cart_menu">
-                    <td className="image">Item</td>
+                    <td className="image">Itemm</td>
                     <td className="description" />
                     <td className="price">Price</td>
                     <td className="quantity">Quantity</td>
