@@ -15,18 +15,10 @@ exports.addBill = async (req, res) => {
     res.status(422).json({ msg: "Invalid data" });
     return;
   }
-  const {
-    id_user,
-    address,
-    total,
-    phone,
-    name,
-    email
-  } = req.body;
+  const { id_user, address, total, phone, name, email } = req.body;
   var cartFind = null;
   try {
     cartFind = await cart.findOne({ id_user: id_user });
-   
   } catch (err) {
     console.log("error ", err);
     res.status(500).json({ msg: err });
@@ -37,11 +29,11 @@ exports.addBill = async (req, res) => {
     return;
   }
   const token = randomstring.generate();
-  let sendEmail = await nodemailer.sendMailConfirmPayment(email, token);
-  if (!sendEmail) {
-    res.status(500).json({ msg: "Send email fail" });
-    return;
-  }
+  // let sendEmail = await nodemailer.sendMailConfirmPayment(email, token);
+  // if (!sendEmail) {
+  //   res.status(500).json({ msg: "Send email fail" });
+  //   return;
+  // }
   const new_bill = new bill({
     id_user: id_user,
     products: cartFind.products,
@@ -49,7 +41,7 @@ exports.addBill = async (req, res) => {
     phone: phone,
     name: name,
     total,
-    token
+    token,
   });
   try {
     await cartFind.remove();
@@ -88,8 +80,8 @@ exports.verifyPayment = async (req, res) => {
   try {
     await bill.findByIdAndUpdate(
       tokenFind._id,
-      { $set: { issend: '99' } },
-      { new: '99' }
+      { $set: { issend: "99" } },
+      { new: "99" }
     );
   } catch (err) {
     res.status(500).json({ msg: err });
@@ -124,7 +116,7 @@ exports.deleteBill = async (req, res) => {
   }
   let billFind = null;
   try {
-    billFind = await bill.findOne({ _id: req.params.id, issend: '99' });
+    billFind = await bill.findOne({ _id: req.params.id, issend: "99" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "server found" });
@@ -146,7 +138,7 @@ exports.deleteBill = async (req, res) => {
 exports.statisticalTop10 = async (req, res) => {
   let billFind = null;
   try {
-    billFind = await bill.find({ issend: '1' });
+    billFind = await bill.find({ issend: "1" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: err });
@@ -158,7 +150,7 @@ exports.statisticalTop10 = async (req, res) => {
     let lenP = billFind[i].products.length;
     for (let j = 0; j < lenP; j++) {
       let index = arr.findIndex(
-        element => billFind[i].products[j]._id === element._id
+        (element) => billFind[i].products[j]._id === element._id
       );
       if (index === -1) {
         arr.push(billFind[i].products[j]);
@@ -167,7 +159,7 @@ exports.statisticalTop10 = async (req, res) => {
       }
     }
   }
-  arr.sort(function(a, b) {
+  arr.sort(function (a, b) {
     return b.count - a.count;
   });
   res.status(200).json({ data: arr.length > 10 ? arr.slice(0, 10) : arr });
@@ -187,9 +179,9 @@ exports.statisticaRevenueDay = async (req, res) => {
     billFind = await bill.find({
       date: {
         $gte: new Date(year, month - 1, day),
-        $lt: new Date(year, month - 1, parseInt(day) + 1)
+        $lt: new Date(year, month - 1, parseInt(day) + 1),
       },
-      issend: '1'
+      issend: "1",
     });
   } catch (err) {
     console.log(err);
@@ -212,9 +204,9 @@ exports.statisticaRevenueMonth = async (req, res) => {
     billFind = await bill.find({
       date: {
         $gte: new Date(year, parseInt(month) - 1, 1),
-        $lt: new Date(year, month, 1)
+        $lt: new Date(year, month, 1),
       },
-      issend: '1'
+      issend: "1",
     });
   } catch (err) {
     console.log(err);
@@ -234,9 +226,9 @@ exports.statisticaRevenueYear = async (req, res) => {
     billFind = await bill.find({
       date: {
         $gte: new Date(year, 0, 1),
-        $lt: new Date(parseInt(year) + 1, 0, 1)
+        $lt: new Date(parseInt(year) + 1, 0, 1),
       },
-      issend: '1'
+      issend: "1",
     });
   } catch (err) {
     console.log(err);
@@ -277,9 +269,9 @@ exports.statisticaRevenueQuauter = async (req, res) => {
     billFind = await bill.find({
       date: {
         $gte: new Date(year, start - 1, 1),
-        $lt: new Date(year, end - 1, 1)
+        $lt: new Date(year, end - 1, 1),
       },
-      issend: '1'
+      issend: "1",
     });
   } catch (err) {
     console.log(err);
@@ -291,7 +283,7 @@ exports.statisticaRevenueQuauter = async (req, res) => {
 exports.getBillNoVerify = async (req, res) => {
   let count = null;
   try {
-    count = await bill.count({ issend: '99' });
+    count = await bill.count({ issend: "99" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: err });
@@ -303,22 +295,23 @@ exports.getBillNoVerify = async (req, res) => {
     res.status(200).json({ data: [], msg: "Invalid page", totalPage });
     return;
   }
-  bill.find({issend: '99'})
+  bill
+    .find({ issend: "99" })
     .skip(9 * (parseInt(page) - 1))
     .limit(9)
     .exec((err, docs) => {
-        if(err) {
-            console.log(err);
-                    res.status(500).json({ msg: err });
-                    return;
-        }
-        res.status(200).json({ data: docs, totalPage });
-    })
+      if (err) {
+        console.log(err);
+        res.status(500).json({ msg: err });
+        return;
+      }
+      res.status(200).json({ data: docs, totalPage });
+    });
 };
 exports.getBillVerify = async (req, res) => {
   let count = null;
   try {
-    count = await bill.count({ issend: '1' });
+    count = await bill.count({ issend: "1" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: err });
@@ -330,22 +323,23 @@ exports.getBillVerify = async (req, res) => {
     res.status(200).json({ data: [], msg: "Invalid page", totalPage });
     return;
   }
-  bill.find({issend: '1'})
+  bill
+    .find({ issend: "1" })
     .skip(9 * (parseInt(page) - 1))
     .limit(9)
     .exec((err, docs) => {
-        if(err) {
-            console.log(err);
-                    res.status(500).json({ msg: err });
-                    return;
-        }
-        res.status(200).json({ data: docs, totalPage });
-    })
+      if (err) {
+        console.log(err);
+        res.status(500).json({ msg: err });
+        return;
+      }
+      res.status(200).json({ data: docs, totalPage });
+    });
 };
 exports.getProcessing = async (req, res) => {
   let count = null;
   try {
-    count = await bill.count({ issend: '0' });
+    count = await bill.count({ issend: "0" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: err });
@@ -357,52 +351,49 @@ exports.getProcessing = async (req, res) => {
     res.status(200).json({ data: [], msg: "Invalid page", totalPage });
     return;
   }
-  bill.find({issend: '0'})
+  bill
+    .find({ issend: "0" })
     .skip(9 * (parseInt(page) - 1))
     .limit(9)
     .exec((err, docs) => {
-        if(err) {
-            console.log(err);
-                    res.status(500).json({ msg: err });
-                    return;
-        }
-        res.status(200).json({ data: docs, totalPage });
-    })
+      if (err) {
+        console.log(err);
+        res.status(500).json({ msg: err });
+        return;
+      }
+      res.status(200).json({ data: docs, totalPage });
+    });
 };
 
 exports.updateIssend = async (req, res) => {
-  if ( typeof req.body.name === 'undefined'||
-       typeof req.body.id === 'undefined'
+  if (
+    typeof req.body.name === "undefined" ||
+    typeof req.body.id === "undefined"
   ) {
-      res.status(422).json({ msg: 'Invalid data' });
-      return;
+    res.status(422).json({ msg: "Invalid data" });
+    return;
   }
   let id = req.body.id;
   let issend = req.body.name;
   let billFind;
   try {
-      
-      billFind = await bill.findById(id);
-  }
- 
-  catch (err) {
-      res.status(500).json({ msg: err });
-      return;
+    billFind = await bill.findById(id);
+  } catch (err) {
+    res.status(500).json({ msg: err });
+    return;
   }
   if (billFind === null) {
-      res.status(422).json({ msg: "not found" });
-      return;
+    res.status(422).json({ msg: "not found" });
+    return;
   }
- 
+
   billFind.issend = issend;
   try {
-      await billFind.save();
+    await billFind.save();
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ msg: err });
+    return;
   }
-  catch (err) {
-      console.log(err);
-      res.status(500).json({ msg: err });
-      return;
-  }
-res.status(201).json({ msg: 'success', bill: { issend: issend } });
-}
-
+  res.status(201).json({ msg: "success", bill: { issend: issend } });
+};
